@@ -4,13 +4,19 @@ __pycache__/
 .ipynb_checkpoints/
 .vscode/
 .DS_Store
+.idea/
+
+# Datasets (do not push)
 Alzheimer_s Dataset/
 Parkinson_s Dataset (Handwriting Test)/
 Parkinson_s Dataset (IRM)/
-anaconda_projects/# Ignore all keras models by default
-*.keras
+anaconda_projects/
+datasets/
+data/
 
-# BUT keep keras models in models/ for deployment
+# Ignore keras everywhere...
+*.keras
+# ...except models/ for deployment
 !models/
 !models/**/*
 !models/*.keras
