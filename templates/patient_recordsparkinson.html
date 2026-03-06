@@ -1,0 +1,223 @@
+{% extends "basee.html" %}
+{% block title %}Enregistrements | Parkinson{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>Enregistrements</h1>
+    <p class="lead">Patients et résultats enregistrés (module Parkinson).</p>
+  </div>
+
+  <div class="page-actions">
+    <input id="searchInput" class="search" type="text" placeholder="Rechercher un patient..." oninput="filterRows()">
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-body">
+    {% if patients and patients|length > 0 %}
+      <div class="table-wrap">
+        <table class="table" id="patientsTable">
+          <thead>
+            <tr>
+              <th>Nom complet</th>
+              <th>Image</th>
+              <th>Statut</th>
+              <th>Classification</th>
+              <th>Dossier</th>
+              <th class="right">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for p in patients %}
+            {% set img_url = url_for('static', filename=p.image) %}
+            <tr>
+              <td>
+                <div class="row-main">
+                  <span class="avatar"><i class="fa-solid fa-user"></i></span>
+                  <div>
+                    <div class="strong patient-name">{{ p.name }}</div>
+                    {% if p.date %}
+                      <div class="muted small">{{ p.date }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <img
+                  src="{{ img_url }}"
+                  class="thumb"
+                  alt="Image"
+                  onclick="openImageModal('{{ img_url }}')"
+                >
+              </td>
+
+              <td>
+                {% if p.status == 'sick' %}
+                  <span class="badge badge-sick">Détecté</span>
+                {% else %}
+                  <span class="badge badge-healthy">Sain</span>
+                {% endif %}
+              </td>
+
+              <td class="mono">{{ p.class_name }}</td>
+
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm"
+                  onclick="openPatientModal(this)"
+                  data-name="{{ p.name }}"
+                  data-date="{{ p.date }}"
+                  data-status="{{ p.status }}"
+                  data-class="{{ p.class_name }}"
+                  data-image="{{ img_url }}"
+                >
+                  <i class="fa-solid fa-file-lines"></i> Voir
+                </button>
+              </td>
+
+              <td class="right">
+                <form method="POST" action="{{ url_for('deletee_patient', index=loop.index0) }}" class="inline">
+                  <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('Supprimer cet enregistrement ?');">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="muted">Aucun enregistrement pour le moment.</div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Modal: Image -->
+<div id="imageModal" class="modal" aria-hidden="true">
+  <div class="modal-backdrop" onclick="closeImageModal()"></div>
+
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title">Image</div>
+      <button class="icon-btn" type="button" onclick="closeImageModal()" aria-label="Fermer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-image">
+        <img id="mriImage" src="" alt="Image">
+      </div>
+
+      <div class="modal-actions" style="margin-top:12px">
+        <button class="btn btn-ghost btn-sm" type="button" onclick="closeImageModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Patient record -->
+<div id="patientModal" class="modal" aria-hidden="true">
+  <div class="modal-backdrop" onclick="closePatientModal()"></div>
+
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title">Dossier patient</div>
+      <button class="icon-btn" type="button" onclick="closePatientModal()" aria-label="Fermer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-meta" id="pmMeta"></div>
+
+      <div class="modal-grid">
+        <div class="modal-image">
+          <img id="pmImage" src="" alt="Image">
+        </div>
+
+        <div class="modal-actions" id="pmInfo"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function filterRows(){
+    const q = (document.getElementById("searchInput").value || "").toLowerCase().trim();
+    const rows = document.querySelectorAll("#patientsTable tbody tr");
+    rows.forEach(row => {
+      const name = (row.querySelector(".patient-name")?.textContent || "").toLowerCase();
+      row.style.display = name.includes(q) ? "" : "none";
+    });
+  }
+
+  function openImageModal(imageUrl){
+    document.getElementById("mriImage").src = imageUrl;
+    document.getElementById("imageModal").classList.add("is-open");
+  }
+
+  function closeImageModal(){
+    document.getElementById("mriImage").src = "";
+    document.getElementById("imageModal").classList.remove("is-open");
+  }
+
+  function openPatientModal(btn){
+    const name = btn.dataset.name || "";
+    const date = btn.dataset.date || "";
+    const status = btn.dataset.status || "";
+    const className = btn.dataset.class || "";
+    const imageUrl = btn.dataset.image || "";
+
+    document.getElementById("pmMeta").textContent = date ? `Date : ${date}` : "";
+    document.getElementById("pmImage").src = imageUrl;
+
+    const isHealthy = status !== "sick";
+    document.getElementById("pmInfo").innerHTML = `
+      <div>
+        <div class="muted small">Nom</div>
+        <div class="strong">${escapeHtml(name)}</div>
+      </div>
+
+      <div>
+        <div class="muted small">Statut</div>
+        <span class="badge ${isHealthy ? "badge-healthy" : "badge-sick"}">
+          ${isHealthy ? "Sain" : "Détecté"}
+        </span>
+      </div>
+
+      <div>
+        <div class="muted small">Classification</div>
+        <div class="mono">${escapeHtml(className)}</div>
+      </div>
+
+      <button class="btn btn-ghost btn-sm" type="button" onclick="closePatientModal()">Fermer</button>
+    `;
+
+    document.getElementById("patientModal").classList.add("is-open");
+  }
+
+  function closePatientModal(){
+    document.getElementById("pmMeta").textContent = "";
+    document.getElementById("pmImage").src = "";
+    document.getElementById("pmInfo").innerHTML = "";
+    document.getElementById("patientModal").classList.remove("is-open");
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+</script>
+{% endblock %}

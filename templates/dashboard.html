@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord | Alzheimer{% endblock %}
+
+{% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>Tableau de bord</h1>
+    <p class="lead">Indicateurs clés du module Alzheimer.</p>
+  </div>
+</section>
+
+<section class="grid-3">
+  <div class="stat-card">
+    <div class="stat-label">Total</div>
+    <div class="stat-value">{{ total }}</div>
+    <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Sains</div>
+    <div class="stat-value">{{ healthy }}</div>
+    <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Détectés</div>
+    <div class="stat-value">{{ sick }}</div>
+    <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+  </div>
+</section>
+
+<section class="grid-2">
+  <div class="panel">
+    <div class="panel-head"><h2>Répartition par classe</h2></div>
+    <div class="panel-body">
+      <canvas id="barChart" height="140"></canvas>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>Activité par date</h2></div>
+    <div class="panel-body">
+      <canvas id="lineChart" height="140"></canvas>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const barLabels  = {{ class_labels | tojson }};
+  const barData    = {{ class_values | tojson }};
+  const lineLabels = {{ date_labels  | tojson }};
+  const lineData   = {{ date_values  | tojson }};
+
+  new Chart(document.getElementById("barChart"), {
+    type: "bar",
+    data: {
+      labels: barLabels,
+      datasets: [{ data: barData, borderWidth: 0, borderRadius: 10 }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  new Chart(document.getElementById("lineChart"), {
+    type: "line",
+    data: {
+      labels: lineLabels,
+      datasets: [{ data: lineData, fill: true, tension: 0.35, pointRadius: 3, borderWidth: 2 }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
+{% endblock %}

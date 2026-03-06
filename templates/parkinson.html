@@ -1,0 +1,147 @@
+{% extends "basee.html" %}
+{% block title %}Dépistage | Parkinson{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>Dépistage Parkinson</h1>
+    <p class="lead">Sélectionnez le type de test, puis soumettez une image.</p>
+  </div>
+</section>
+
+<section class="grid-2">
+  <div class="panel">
+    <div class="panel-head"><h2>Informations</h2></div>
+    <div class="panel-body">
+      <div class="grid-2">
+        <div class="panel subtle">
+          <div class="panel-body">
+            <div class="muted small">Date</div>
+            <div class="strong">{{ current_date }}</div>
+          </div>
+        </div>
+
+        <div class="panel subtle">
+          <div class="panel-body">
+            <div class="muted small">Tests du jour</div>
+            <div class="strong">{{ test_count }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hint hint-top">
+        Choisissez correctement le type de test (IRM ou dessin) pour obtenir un résultat cohérent.
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>Formulaire</h2></div>
+    <div class="panel-body">
+      <form class="form" action="/detect_parkinson" method="POST" enctype="multipart/form-data">
+        <div class="field-row">
+          <div class="field">
+            <label>Prénom</label>
+            <input type="text" name="first_name" required value="{{ first_name or '' }}">
+          </div>
+
+          <div class="field">
+            <label>Nom</label>
+            <input type="text" name="last_name" required value="{{ last_name or '' }}">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Type de test</label>
+          <select name="testType" required>
+            <option value="" {% if not test_type %}selected{% endif %}>Sélectionner</option>
+            <option value="MRI" {% if test_type == 'MRI' %}selected{% endif %}>IRM cérébrale</option>
+            <option value="Drawing" {% if test_type == 'Drawing' %}selected{% endif %}>Dessin à main levée</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Image</label>
+          <input type="file" name="file" accept="image/*" required>
+          <div class="hint">Formats : jpg, jpeg, png, webp.</div>
+        </div>
+
+        <div class="actions-left">
+          <button class="btn" type="submit" name="action" value="detect">
+            <i class="fa-solid fa-play"></i> Lancer
+          </button>
+
+          <a class="btn btn-ghost" href="{{ url_for('parkinson_page') }}">
+            <i class="fa-solid fa-rotate-left"></i> Réinitialiser
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><h2>Résultat</h2></div>
+  <div class="panel-body">
+    {% if prediction %}
+      {% set is_healthy = ("normal" in prediction|lower) or ("healthy" in prediction|lower) %}
+
+      <div class="grid-2">
+        <div class="panel subtle">
+          <div class="panel-body stack-sm">
+            <div>
+              <div class="muted small">Patient</div>
+              <div class="strong">{{ first_name }} {{ last_name }}</div>
+            </div>
+
+            <div>
+              <div class="muted small">Type de test</div>
+              <div class="strong">
+                {% if test_type == "MRI" %}IRM cérébrale
+                {% elif test_type == "Drawing" %}Dessin à main levée
+                {% else %}-{% endif %}
+              </div>
+            </div>
+
+            <div>
+              <div class="muted small">Statut</div>
+              <span class="badge {% if is_healthy %}badge-healthy{% else %}badge-sick{% endif %}">
+                {% if is_healthy %}Sain{% else %}Détecté{% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel subtle">
+          <div class="panel-body stack-sm">
+            <div>
+              <div class="muted small">Classe prédite</div>
+              <div class="strong">{{ prediction }}</div>
+            </div>
+
+            <div class="actions-left">
+              <button class="btn btn-ghost btn-sm" type="button" onclick="window.print()">
+                <i class="fa-solid fa-print"></i> Imprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if image_url %}
+        <div class="panel subtle">
+          <div class="panel-body">
+            <div class="muted small">Image soumise</div>
+            <div class="media-box">
+              <img class="media-img" src="{{ url_for('static', filename=image_url) }}" alt="Image test">
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+    {% else %}
+      <div class="muted">Aucun résultat pour le moment.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,11 @@
+venv/
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+.vscode/
+.DS_Store
+Alzheimer_s Dataset/
+Parkinson_s Dataset (Handwriting Test)/
+Parkinson_s Dataset (IRM)/
+anaconda_projects/
+*.keras

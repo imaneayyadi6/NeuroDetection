@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Neuro App{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  {% block head %}{% endblock %}
+</head>
+
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a class="brand" href="/">
+          <span class="brand-mark"><i class="fa-solid fa-brain"></i></span>
+          <span>
+            <span class="brand-title">Neuro App</span>
+            <span class="brand-subtitle">Dépistage Parkinson</span>
+          </span>
+        </a>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-section">
+          <div class="nav-label">Parkinson</div>
+
+          <a class="nav-item {% if request.path.startswith('/dashboardparkinson') %}active{% endif %}" href="/dashboardparkinson">
+            <i class="fa-solid fa-chart-column"></i>
+            <span>Tableau de bord</span>
+          </a>
+
+          <a class="nav-item {% if request.path.startswith('/parkinson') %}active{% endif %}" href="/parkinson">
+            <i class="fa-solid fa-stethoscope"></i>
+            <span>Dépistage</span>
+          </a>
+
+          <a class="nav-item {% if request.path.startswith('/patientss') %}active{% endif %}" href="/patientss">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span>Enregistrements</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Général</div>
+          <a class="nav-item {% if request.path == '/' %}active{% endif %}" href="/">
+            <i class="fa-solid fa-house"></i>
+            <span>Accueil</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <div class="app-main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <span class="pill">Parkinson</span>
+          <span class="topbar-path">{{ request.path }}</span>
+        </div>
+      </header>
+
+      <main class="content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
