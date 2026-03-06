@@ -1,11 +1,14 @@
-venv/
-.venv/
 __pycache__/
 .ipynb_checkpoints/
-.vscode/
+*.pyc
 .DS_Store
+.env
+venv/
+.venv/
+
+# Don't upload datasets
+data/
+dataset/
+datasets/
 Alzheimer_s Dataset/
-Parkinson_s Dataset (Handwriting Test)/
-Parkinson_s Dataset (IRM)/
-anaconda_projects/
-*.keras
+parkinsons_dataset/
