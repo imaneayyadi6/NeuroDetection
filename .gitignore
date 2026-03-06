@@ -7,5 +7,10 @@ __pycache__/
 Alzheimer_s Dataset/
 Parkinson_s Dataset (Handwriting Test)/
 Parkinson_s Dataset (IRM)/
-anaconda_projects/
+anaconda_projects/# Ignore all keras models by default
 *.keras
+
+# BUT keep keras models in models/ for deployment
+!models/
+!models/**/*
+!models/*.keras
